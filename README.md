@@ -10,6 +10,8 @@ It accompanies the feature request [nextcloud/spreed#20400](https://github.com/n
 
 ## What to try
 
+The three buttons under the mock (Earlier captions, Talk sidebar, Pin to side) switch between the states. Inside the mock:
+
 - The button beside the caption box opens and closes the history. Esc closes it too.
 - Scroll up to read back. The box stops following, and "Jump to live" returns to the newest line.
 - The participants button in the top bar opens Talk's sidebar. The captions stay over the call.
