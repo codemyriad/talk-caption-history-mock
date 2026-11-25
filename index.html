@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Caption history in Talk: design mock</title>
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: #101418; }
+.boot * { transition: none !important; }
+button:focus-visible, #feed:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+#note { position: fixed; left: 0; right: 0; bottom: 0; height: 30px; display: flex; align-items: center; justify-content: center; gap: 6px; font: 13px system-ui, sans-serif; color: #c4c4c4; }
+#note a { color: #ffffff; }
+</style>
+</head>
+<body>
+
+<div id="stage" style="position: absolute; top: 0; transform-origin: 0 0; width: 1440px; height: 900px; box-sizing: border-box; overflow: hidden; background: linear-gradient(120deg, #00679e, #0082c9); color: #ffffff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Oxygen-Sans, Cantarell, Ubuntu, 'Helvetica Neue', 'Noto Sans', Arial, sans-serif; font-size: 15px; line-height: 1.4">
+
+  <!-- Nextcloud header -->
+  <div style="position: absolute; top: 0; left: 0; right: 0; height: 50px; display: flex; align-items: center; gap: 20px; padding: 0 16px">
+    <svg width="62" height="30" viewBox="0 0 62 30" role="img" aria-label="Nextcloud" fill="none" stroke="#ffffff"><circle cx="31" cy="15" r="10" stroke-width="5"></circle><circle cx="8" cy="15" r="5.5" stroke-width="4"></circle><circle cx="54" cy="15" r="5.5" stroke-width="4"></circle></svg>
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="#ffffff"><circle cx="4" cy="4" r="1.7"></circle><circle cx="10" cy="4" r="1.7"></circle><circle cx="16" cy="4" r="1.7"></circle><circle cx="4" cy="10" r="1.7"></circle><circle cx="10" cy="10" r="1.7"></circle><circle cx="16" cy="10" r="1.7"></circle><circle cx="4" cy="16" r="1.7"></circle><circle cx="10" cy="16" r="1.7"></circle><circle cx="16" cy="16" r="1.7"></circle></svg>
+    <div style="display: flex; align-items: center; gap: 8px; font-weight: 600">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="#ffffff" stroke-width="3"><circle cx="9.5" cy="9.5" r="7"></circle><path d="M14 14l4 4" stroke-linecap="round"></path></svg>
+      <span>Talk</span>
+    </div>
+    <div style="position: absolute; left: 470px; width: 500px; height: 34px; border-radius: 17px; background: rgba(0, 0, 0, 0.18); display: flex; align-items: center; justify-content: center; gap: 10px; color: #ffffff">
+      <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="M13 13l4.5 4.5" stroke-linecap="round"></path></svg>
+      <span>Apps, files, messages, and more</span>
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 22px">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="#ffffff"><path d="M10 2.5a5 5 0 0 0-5 5v4L3.5 14v1h13v-1L15 11.500v-4a5 5 0 0 0-5-5zM8.300 16.500a1.800 1.800 0 0 0 3.400 0z"></path></svg>
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="#ffffff" stroke-width="1.800"><rect x="3" y="3" width="14" height="14" rx="2"></rect><circle cx="10" cy="8.500" r="2.200"></circle><path d="M6 14.500c.800-2 2.300-2.800 4-2.800s3.200.800 4 2.800"></path></svg>
+      <span style="width: 32px; height: 32px; border-radius: 50%; background: #f7ecee; color: #b8506a; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">ML</span>
+    </div>
+  </div>
+
+  <!-- Talk call view -->
+  <div id="call" style="position: absolute; top: 50px; left: 8px; right: 8px; bottom: 8px; border-radius: 16px; background: #3d4349; overflow: hidden; transition: right 0.28s ease">
+
+    <!-- Top bar -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 12px; box-sizing: border-box">
+      <button type="button" aria-label="Open navigation" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800"><rect x="3" y="4" width="14" height="12" rx="1.500"></rect><path d="M8 4v12"></path></svg>
+      </button>
+      <span style="width: 40px; height: 40px; border-radius: 50%; background: #6f757b; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true" fill="#ffffff"><circle cx="7.500" cy="7" r="2.800"></circle><circle cx="13.500" cy="7.500" r="2.200"></circle><path d="M2 15.500c.500-3 2.700-4.300 5.500-4.300s5 1.300 5.500 4.300zM13.800 11.300c2.200.100 3.800 1.300 4.200 4.200h-3.500c-.100-1.700-.400-3.100-.700-4.200z"></path></svg>
+      </span>
+      <span style="font-weight: 600; margin-left: 4px">Release standup</span>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 28px; padding-right: 8px">
+        <span style="font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em" id="timer"></span>
+        <button id="people" type="button" aria-label="Open sidebar" title="Open sidebar" style="display: flex; align-items: center; gap: 6px; font: inherit; font-weight: 600; color: inherit; background: transparent; border: 0; border-radius: 8px; padding: 6px 8px; margin: -6px -8px; cursor: pointer">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800"><circle cx="7.500" cy="7" r="2.600"></circle><path d="M2.500 15.500c.500-2.800 2.500-4 5-4s4.500 1.200 5 4"></path><path d="M12.500 4.600a2.600 2.600 0 0 1 0 4.800M15 11.800c1.400.500 2.300 1.700 2.600 3.700"></path></svg>
+          4
+        </button>
+        <svg width="20" height="20" viewBox="0 0 20 20" role="img" aria-label="Search" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.500" cy="8.500" r="5.500"></circle><path d="M13 13l4.500 4.500" stroke-linecap="round"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 20 20" role="img" aria-label="More" fill="currentColor"><circle cx="4" cy="10" r="1.700"></circle><circle cx="10" cy="10" r="1.700"></circle><circle cx="16" cy="10" r="1.700"></circle></svg>
+      </div>
+    </div>
+
+    <!-- Video grid -->
+    <div id="grid" style="position: absolute; top: 56px; left: 8px; right: 8px; bottom: 58px; transition: right 0.28s ease; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px"></div>
+
+    <!-- Caption box: today's overlay, which grows upwards into the history -->
+    <div id="wrap" style="position: absolute; left: 285px; width: 854px; bottom: 78px; transition: left 0.28s ease, width 0.28s ease, bottom 0.28s ease; z-index: 2">
+      <section id="box" aria-label="Live captions" style="position: relative; height: 124px; transition: height 0.28s ease; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: rgba(34, 34, 34, 0.86); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px)">
+        <div id="head" style="flex: none; height: 44px; display: none; align-items: center; gap: 8px; padding: 0 5px 0 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.14)">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4" width="15" height="12" rx="2"></rect><path d="M5.5 9h3M10.5 9h4M5.5 12.5h5M12.5 12.5h2" stroke-linecap="round"></path></svg>
+          <span id="headTitle" style="font-weight: 600; white-space: nowrap"></span>
+          <span id="headNote" style="margin-left: auto; font-size: 13px; color: #c4c4c4; white-space: nowrap"></span>
+          <button id="pin" type="button" style="flex: none; width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="4" width="15" height="12" rx="1.5"></rect><rect x="12" y="4" width="5.5" height="12" fill="currentColor"></rect></svg>
+          </button>
+          <button id="close" type="button" aria-label="Back to the caption box" title="Back to the caption box" style="flex: none; width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #ffffff; display: none; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"></path></svg>
+          </button>
+        </div>
+        <div id="feed" tabindex="0" style="position: relative; flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: hidden; display: flex; flex-direction: column; outline: none">
+          <div id="list" style="margin-top: auto; padding: 0 0 4px"></div>
+        </div>
+        <button id="jump" type="button" style="position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); height: 34px; padding: 0 14px 0 10px; border: 0; border-radius: 17px; background: #ffffff; color: #222222; font: inherit; font-weight: 600; display: none; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45)">
+          <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M5 11l5 5 5-5"></path></svg>
+          <span id="jumpLabel"></span>
+        </button>
+      </section>
+      <button id="toggle" type="button" style="position: absolute; left: 100%; top: 0; margin-left: 8px; width: 34px; height: 34px; border: 0; border-radius: 8px; background: rgba(34, 34, 34, 0.86); color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+        <svg id="chev" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.28s ease"><path d="M5 12.5l5-5 5 5"></path></svg>
+      </button>
+    </div>
+
+    <!-- Bottom bar -->
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-sizing: border-box">
+      <div style="display: flex; gap: 4px; width: 200px">
+        <button type="button" aria-label="Full screen" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4"></path></svg>
+        </button>
+        <button type="button" aria-label="Grid view" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800"><rect x="3.500" y="3.500" width="5.500" height="5.500"></rect><rect x="11" y="3.500" width="5.500" height="5.500"></rect><rect x="3.500" y="11" width="5.500" height="5.500"></rect><rect x="11" y="11" width="5.500" height="5.500"></rect></svg>
+        </button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px">
+        <button type="button" aria-label="Mute microphone" style="width: 34px; height: 34px; border: 0; border-radius: 8px 2px 2px 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"><rect x="7.500" y="2.500" width="5" height="9" rx="2.500" fill="currentColor"></rect><path d="M4.500 9.500a5.500 5.500 0 0 0 11 0M10 15v2.500"></path></svg>
+        </button>
+        <button type="button" aria-label="Microphone options" style="width: 24px; height: 34px; margin-left: -3px; border: 0; border-radius: 2px 8px 8px 2px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l5-5 5 5"></path></svg>
+        </button>
+        <button type="button" aria-label="Enable camera" style="width: 34px; height: 34px; border: 0; border-radius: 8px 2px 2px 8px; background: #1f2327; color: #b5b5b5; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><rect x="2.500" y="5.500" width="10.500" height="9" rx="1.500"></rect><path d="M13 9l4.500-2.500v7L13 11M3 3l14 14"></path></svg>
+        </button>
+        <button type="button" aria-label="Camera options" style="width: 24px; height: 34px; margin-left: -3px; border: 0; border-radius: 2px 8px 8px 2px; background: #1f2327; color: #b5b5b5; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l5-5 5 5"></path></svg>
+        </button>
+        <button type="button" aria-label="Blur background" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"><circle cx="10" cy="8" r="2.800"></circle><path d="M4.500 16.500c.600-2.700 2.700-4 5.500-4s4.900 1.300 5.500 4M3 5.500l1.500 1M17 5.500l-1.500 1M6 2.500l.800 1.500M14 2.500l-.800 1.500"></path></svg>
+        </button>
+        <button type="button" aria-label="Share screen" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"><rect x="2.500" y="3.500" width="15" height="10.500" rx="1.500"></rect><path d="M7 17h6M10 11.500V7M7.800 8.800L10 6.500l2.200 2.300"></path></svg>
+        </button>
+        <button type="button" aria-label="Reactions" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #1f2327; color: #ffffff; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"><circle cx="10" cy="10" r="7"></circle><path d="M7 11.500c.700 1.200 1.700 1.800 3 1.800s2.300-.600 3-1.800M7.500 8v.100M12.500 8v.100"></path></svg>
+        </button>
+        <button type="button" aria-label="Disable live captions" aria-pressed="true" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: #e8e8e8; color: #222222; display: flex; align-items: center; justify-content: center; padding: 0">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.700"><rect x="2.500" y="4" width="15" height="12" rx="2"></rect><path d="M5.500 9h3M10.500 9h4M5.500 12.500h5M12.500 12.500h2" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; width: 200px">
+        <button type="button" style="height: 34px; padding: 0 14px 0 12px; border: 0; border-radius: 8px; background: #db0606; color: #ffffff; font: inherit; font-weight: 600; display: flex; align-items: center; gap: 8px">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><path d="M10 7.500c-3 0-5.700 1-7.600 2.700-.500.500-.500 1.200 0 1.700l1.300 1.300c.400.400 1 .500 1.500.200l2-1.200c.400-.200.600-.600.600-1V9.900c1.400-.400 3-.400 4.400 0v1.300c0 .400.200.800.600 1l2 1.200c.500.300 1.100.200 1.500-.200l1.300-1.300c.500-.500.500-1.200 0-1.700C15.700 8.500 13 7.500 10 7.500z"></path></svg>
+          Leave call
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Talk's own right sidebar, unchanged: captions are not a tab in it -->
+  <aside id="side" aria-label="Conversation sidebar" style="position: absolute; top: 50px; right: 8px; bottom: 8px; width: 390px; box-sizing: border-box; border-radius: 16px; background: #ffffff; color: #222222; display: flex; flex-direction: column; transform: translateX(410px); transition: transform 0.28s ease">
+    <div style="display: flex; align-items: center; padding: 14px 10px 6px 18px">
+      <span style="font-size: 20px; font-weight: 700">Release standup</span>
+      <button id="sideClose" type="button" aria-label="Close sidebar" title="Close sidebar" style="margin-left: auto; width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #222222; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"></path></svg>
+      </button>
+    </div>
+    <div style="display: flex; padding: 4px 10px 0; border-bottom: 1px solid #ededed">
+      <span style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 10px; border-radius: 8px 8px 0 0; background: #e6eff5; box-shadow: inset 0 -3px 0 #00679e; font-weight: 600">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 4h13v9.500h-8L5 16.500v-3H3.500z"></path></svg>
+        Chat
+      </span>
+      <span style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 10px">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7.5" cy="7" r="2.6"></circle><path d="M2.5 15.500c.500-2.800 2.500-4 5-4s4.500 1.200 5 4"></path><path d="M12.500 4.600a2.600 2.600 0 0 1 0 4.800M15 11.800c1.400.500 2.300 1.700 2.600 3.700"></path></svg>
+        Participants
+      </span>
+      <span style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 10px">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="6" y="3" width="11" height="10.500"></rect><path d="M3.500 6v10.500H14M8 11l2.500-3 2 2.300 1.200-1.300 1.800 2"></path></svg>
+        Shared items
+      </span>
+    </div>
+    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 16px 18px">
+      <p style="margin: 0; text-align: center; font-size: 13px; color: #6b6b6b">Daniel Okoro started a call</p>
+      <div style="display: flex; gap: 10px">
+        <span style="flex: none; width: 32px; height: 32px; border-radius: 50%; background: #efeaf3; color: #6f4fa6; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">HB</span>
+        <div><p style="margin: 0; font-size: 13px; color: #6b6b6b">Hannah Brooks · 10:02</p><p style="margin: 2px 0 0">The upgrade notes will be in the release folder before lunch.</p></div>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <span style="flex: none; width: 32px; height: 32px; border-radius: 50%; background: #e8f1f2; color: #2f7a83; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">NK</span>
+        <div><p style="margin: 0; font-size: 13px; color: #6b6b6b">Nora Kelly · 10:04</p><p style="margin: 2px 0 0">Announcement draft comes tomorrow morning.</p></div>
+      </div>
+    </div>
+    <div style="margin: 0 12px 12px; height: 40px; box-sizing: border-box; border: 2px solid #949494; border-radius: 12px; display: flex; align-items: center; padding: 0 12px; color: #6b6b6b">Write a message …</div>
+  </aside>
+</div>
+
+<p id="note">Design mock, not a running Talk. Scripted captions. Proposal for <a href="https://github.com/nextcloud/spreed/issues/20400">nextcloud/spreed#20400</a>.</p>
+<script>
+(function () {
+  var people = {
+    do: { name: 'Daniel Okoro', initials: 'DO', bg: '#f6e9f0', fg: '#a8457f' },
+    hb: { name: 'Hannah Brooks', initials: 'HB', bg: '#efeaf3', fg: '#6f4fa6' },
+    nk: { name: 'Nora Kelly', initials: 'NK', bg: '#e8f1f2', fg: '#2f7a83' },
+    ml: { name: 'Maya Lindqvist', initials: 'ML', bg: '#f7ecee', fg: '#b8506a' }
+  };
+  var order = ['do', 'hb', 'nk', 'ml'];
+  var me = 'ml';
+  var seed = [
+    { label: 'Captions started · 00:42' },
+    { who: 'do', t: 42, text: 'Let’s start with the release. Where are we with the packages?' },
+    { who: 'hb', t: 70, text: 'The packages built last night. I installed them on three test servers yesterday, and all of them came up without problems.' },
+    { label: 'Nora Kelly joined · 02:20' },
+    { who: 'nk', t: 151, text: 'The documentation is ready for review. I added a section about container limits.' },
+    { who: 'do', t: 242, text: 'Good. What about the upgrade path from the last version?' },
+    { who: 'hb', t: 255, text: 'Tested twice. Settings carry over, and nothing has to be configured again.' },
+    { who: 'do', t: 408, text: 'Then the open point is the announcement. Nora, can you draft it?' },
+    { who: 'nk', t: 415, text: 'Yes. I will have a draft by tomorrow morning.' },
+    { label: 'You joined here · 08:05', seam: true },
+    { who: 'ml', t: 492, text: 'Sorry I’m late. Did I miss the decision on the date?' },
+    { who: 'do', t: 500, text: 'Not yet. Is anything blocking the launch?' },
+    { who: 'hb', t: 506, text: 'No. We are ready, and all the tests are green.' },
+    { who: 'nk', t: 511, text: 'Then we can publish on Thursday.' },
+    { who: 'ml', t: 515, text: 'Thursday works for me. Let’s do it.' }
+  ];
+  var script = [
+    { who: 'do', text: 'Great. I will tell the support team today so they can prepare.' },
+    { who: 'hb', text: 'I can write the upgrade notes and send them round before lunch.' },
+    { who: 'nk', text: 'Should we mention the new container limits in the announcement?' },
+    { who: 'ml', text: 'Yes, one short paragraph. Most administrators will want to know.' },
+    { who: 'do', text: 'Agreed. Anything else before we close?' },
+    { who: 'hb', text: 'One thing. The test servers need to be rebuilt after the release.' },
+    { who: 'nk', text: 'I can help with that on Friday.' }
+  ];
+
+  var params = new URLSearchParams(location.search);
+  var start = params.get('start') || 'captions';
+  var animate = params.get('animate') !== '0';
+  var s = {
+    mode: start === 'pinned' ? 'pinned' : (start === 'captions' ? 'captions' : 'history'),
+    follow: start !== 'scrolled',
+    missed: start === 'scrolled' ? 3 : 0,
+    line: 0, word: 6, pause: 0, ticks: 0, lineStart: 518, finals: [],
+    sidebar: params.get('sidebar') === '1', wasPinned: false
+  };
+  if (s.sidebar && s.mode === 'pinned') { s.mode = 'captions'; s.wasPinned = true; }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var feed = $('feed'), list = $('list'), seamEl = null, raf = 0;
+
+  function el(tag, style, text) {
+    var n = document.createElement(tag);
+    if (style) n.style.cssText = style;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function fmt(t, sep) {
+    return String(Math.floor(t / 60)).padStart(2, '0') + sep + String(t % 60).padStart(2, '0');
+  }
+  function clock() { return 520 + Math.floor(s.ticks * 0.3); }
+
+  var tiles = {};
+  order.forEach(function (id) {
+    var p = people[id];
+    var tile = el('div', 'position: relative; border-radius: 12px; background: #363636; display: flex; align-items: center; justify-content: center; transition: box-shadow 0.2s');
+    tile.appendChild(el('span', 'width: 180px; height: 180px; border-radius: 50%; background: ' + p.bg + '; color: ' + p.fg + '; display: flex; align-items: center; justify-content: center; font-size: 84px; line-height: 1', p.initials));
+    tile.appendChild(el('span', 'position: absolute; left: 16px; bottom: 12px; font-size: 15px; font-weight: 500', p.name));
+    $('grid').appendChild(tile);
+    tiles[id] = tile;
+  });
+
+  function marker(x) {
+    var row = el('div', 'display: flex; align-items: center; gap: 12px; height: 30px; padding: 4px 16px 0; font-size: 13px; color: ' + (x.seam ? '#ffffff' : '#c4c4c4') + '; font-weight: ' + (x.seam ? 600 : 400));
+    var rule = 'flex: 1; height: 1px; background: rgba(255, 255, 255, 0.22)';
+    row.appendChild(el('span', rule));
+    row.appendChild(el('span', '', x.label));
+    row.appendChild(el('span', rule));
+    if (x.seam) seamEl = row;
+    return row;
+  }
+  function block(x, partial, open) {
+    var p = people[x.who];
+    var row = el('div', 'display: flex; align-items: flex-start; padding-right: 12px');
+    var av = el('div', 'flex: none; padding: 8px; margin-top: 8px');
+    av.appendChild(el('span', 'width: 24px; height: 24px; border-radius: 50%; background: ' + p.bg + '; color: ' + p.fg + '; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600', p.initials));
+    var body = el('div', 'flex: 1; min-width: 0');
+    var who = el('p', 'margin: 4px 0 -4px; line-height: 30px; color: #c4c4c4; display: flex; align-items: center; gap: 8px; white-space: nowrap');
+    who.appendChild(el('span', '', p.name));
+    if (x.who === me) who.appendChild(el('span', 'font-size: 12px; line-height: 16px; padding: 0 6px; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 9px', 'you'));
+    if (open) who.appendChild(el('span', 'font-size: 13px; font-variant-numeric: tabular-nums', fmt(x.t, ':')));
+    body.appendChild(who);
+    body.appendChild(el('p', 'margin: 0; line-height: 30px; color: ' + (partial ? 'rgba(255, 255, 255, 0.66)' : '#ffffff') + '; font-style: ' + (partial ? 'italic' : 'normal'), x.text));
+    row.appendChild(av);
+    row.appendChild(body);
+    return row;
+  }
+
+  function stick() {
+    if (s.mode === 'captions' || s.follow) feed.scrollTop = feed.scrollHeight;
+  }
+  function settle() {
+    var t0 = Date.now();
+    cancelAnimationFrame(raf);
+    (function step() {
+      stick();
+      if (Date.now() - t0 < 450) raf = requestAnimationFrame(step);
+    })();
+  }
+
+  function render() {
+    var open = s.mode !== 'captions', pinned = s.mode === 'pinned';
+    var L = script[s.line % script.length];
+    var words = L.text.split(' ');
+    var speaking = s.word > 0 && s.word < words.length && s.pause === 0 ? L.who : null;
+
+    order.forEach(function (id) {
+      tiles[id].style.boxShadow = speaking === id ? 'inset 0 0 0 3px #ffffff' : 'inset 0 0 0 0 #ffffff';
+    });
+    $('timer').textContent = fmt(clock(), ' : ');
+
+    var W = s.sidebar ? 1026 : 1424;
+    $('call').style.right = s.sidebar ? '406px' : '8px';
+    $('side').style.transform = s.sidebar ? 'translateX(0)' : 'translateX(410px)';
+    var people = $('people');
+    var peopleLabel = s.sidebar ? 'Close sidebar' : 'Open sidebar';
+    people.setAttribute('aria-label', peopleLabel);
+    people.title = peopleLabel;
+    $('grid').style.right = pinned ? '376px' : '8px';
+    var wrap = $('wrap').style;
+    wrap.left = pinned ? (W - 368) + 'px' : Math.round(W * 0.2) + 'px';
+    wrap.width = pinned ? '360px' : Math.round(W * 0.6) + 'px';
+    wrap.bottom = pinned ? '58px' : '78px';
+    var box = $('box').style;
+    box.height = pinned ? '728px' : (open ? '500px' : '124px');
+    box.boxShadow = open && !pinned ? '0 8px 40px rgba(0, 0, 0, 0.5)' : 'none';
+    feed.style.overflowY = open ? 'auto' : 'hidden';
+
+    $('head').style.display = open ? 'flex' : 'none';
+    $('headTitle').textContent = pinned ? 'Captions' : 'Captions from this call';
+    $('headNote').textContent = pinned ? 'AI-generated' : 'AI-generated · not saved after the call';
+    var pin = $('pin');
+    var pinLabel = pinned ? 'Unpin from the side' : 'Pin to the side';
+    pin.setAttribute('aria-label', pinLabel);
+    pin.title = pinLabel;
+    pin.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+    pin.style.background = pinned ? 'rgba(255, 255, 255, 0.2)' : 'transparent';
+    pin.style.display = s.sidebar ? 'none' : 'flex';
+    $('headNote').style.marginRight = s.sidebar ? '11px' : '0';
+    $('close').style.display = pinned ? 'flex' : 'none';
+
+    var toggle = $('toggle');
+    var toggleLabel = open ? 'Hide earlier captions' : 'Show earlier captions';
+    toggle.style.display = pinned ? 'none' : 'flex';
+    toggle.setAttribute('aria-label', toggleLabel);
+    toggle.title = toggleLabel;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    $('chev').style.transform = 'rotate(' + (open ? 180 : 0) + 'deg)';
+
+    $('jump').style.display = open && !s.follow ? 'flex' : 'none';
+    $('jumpLabel').textContent = s.missed > 0 ? 'Jump to live · ' + s.missed + ' new' : 'Jump to live';
+
+    var frag = document.createDocumentFragment();
+    seed.forEach(function (x) { frag.appendChild(x.who ? block(x, false, open) : marker(x)); });
+    s.finals.forEach(function (x) { frag.appendChild(block(x, false, open)); });
+    if (s.word > 0) {
+      var partial = s.word < words.length;
+      frag.appendChild(block({ who: L.who, t: s.lineStart, text: words.slice(0, s.word).join(' ') + (partial ? '…' : '') }, partial, open));
+    }
+    var keep = feed.scrollTop;
+    list.replaceChildren(frag);
+    feed.scrollTop = keep;
+    stick();
+  }
+
+  function tick() {
+    var L = script[s.line % script.length];
+    var n = L.text.split(' ').length;
+    s.ticks += 1;
+    if (s.pause > 0) {
+      s.pause -= 1;
+    } else if (s.word < n) {
+      if (s.word === 0) s.lineStart = clock();
+      s.word += 1;
+    } else {
+      s.finals = s.finals.concat([{ who: L.who, text: L.text, t: s.lineStart }]).slice(-40);
+      s.missed = s.mode !== 'captions' && !s.follow ? s.missed + 1 : 0;
+      s.line += 1;
+      s.word = 0;
+      s.pause = 4;
+    }
+    render();
+  }
+
+  function toggleSidebar() {
+    s.sidebar = !s.sidebar;
+    if (s.sidebar && s.mode === 'pinned') { s.mode = 'captions'; s.wasPinned = true; }
+    else if (!s.sidebar && s.wasPinned) { s.mode = 'pinned'; s.wasPinned = false; }
+    s.follow = true;
+    s.missed = 0;
+    render();
+    settle();
+  }
+  function setMode(mode) {
+    s.wasPinned = false;
+    s.mode = mode;
+    s.follow = true;
+    s.missed = 0;
+    render();
+    settle();
+  }
+  $('people').addEventListener('click', toggleSidebar);
+  $('sideClose').addEventListener('click', toggleSidebar);
+  $('toggle').addEventListener('click', function () { setMode(s.mode === 'captions' ? 'history' : 'captions'); });
+  $('close').addEventListener('click', function () { setMode('captions'); });
+  $('pin').addEventListener('click', function () { setMode(s.mode === 'pinned' ? 'history' : 'pinned'); });
+  $('jump').addEventListener('click', function () { s.follow = true; s.missed = 0; render(); settle(); });
+  feed.addEventListener('scroll', function () {
+    if (s.mode === 'captions') return;
+    var near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 28;
+    if (near !== s.follow) {
+      s.follow = near;
+      if (near) s.missed = 0;
+      render();
+    }
+  });
+  function userScrolledUp() {
+    if (s.mode !== 'captions' && s.follow && feed.scrollHeight > feed.clientHeight) { s.follow = false; render(); }
+  }
+  feed.addEventListener('wheel', function (e) { if (e.deltaY < 0) userScrolledUp(); }, { passive: true });
+  feed.addEventListener('touchmove', userScrolledUp, { passive: true });
+  feed.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') userScrolledUp();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && s.mode !== 'captions') setMode('captions');
+  });
+
+  var stage = $('stage');
+  function fit() {
+    var k = Math.min(window.innerWidth / 1440, (window.innerHeight - 30) / 900);
+    stage.style.transform = 'scale(' + k + ')';
+    stage.style.left = Math.max(0, (window.innerWidth - 1440 * k) / 2) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  document.documentElement.classList.add('boot');
+  render();
+  settle();
+  setTimeout(function () { document.documentElement.classList.remove('boot'); }, 60);
+  if (start === 'scrolled' && seamEl) {
+    setTimeout(function () { feed.scrollTop = Math.max(0, seamEl.offsetTop - 170); }, 120);
+  }
+  if (animate) setInterval(tick, 300);
+})();
+
+</script>
+</body>
+</html>
