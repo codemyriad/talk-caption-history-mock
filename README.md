@@ -6,6 +6,8 @@ It accompanies the feature request [nextcloud/spreed#20400](https://github.com/n
 
 **Live page:** https://codemyriad.github.io/talk-caption-history-mock/
 
+![The caption history open over a call, scrolled back to before the viewer joined](screenshots/2-history-open.png)
+
 ## What to try
 
 - The button beside the caption box opens and closes the history. Esc closes it too.
