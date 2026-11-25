@@ -9,6 +9,11 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: #101418; }
 .boot * { transition: none !important; }
 button:focus-visible, #feed:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+#stage button:not([id]) { cursor: default; }
+#toggle:hover, #pin:hover, #close:hover, #people:hover, #sideClose:hover { box-shadow: inset 0 0 0 99px rgba(128, 128, 128, 0.25); }
+@keyframes hint { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.85); } 70%, 100% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); } }
+.hint { animation: hint 1.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .hint { animation: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85); } }
 #note { position: fixed; left: 0; right: 0; bottom: 0; height: 30px; display: flex; align-items: center; justify-content: center; gap: 6px; font: 13px system-ui, sans-serif; color: #c4c4c4; }
 #note { margin: 0; }
 #note a { color: #ffffff; }
@@ -375,7 +380,11 @@ button:focus-visible, #feed:focus-visible { outline: 2px solid #ffffff; outline-
     render();
   }
 
+  var hints = animate && !params.has('start') && !params.has('sidebar');
+  function used(id) { $(id).classList.remove('hint'); }
+  if (hints) ['toggle', 'people', 'pin'].forEach(function (id) { $(id).classList.add('hint'); });
   function toggleSidebar() {
+    used('people');
     s.sidebar = !s.sidebar;
     if (s.sidebar && s.mode === 'pinned') { s.mode = 'captions'; s.wasPinned = true; }
     else if (!s.sidebar && s.wasPinned) { s.mode = 'pinned'; s.wasPinned = false; }
@@ -385,6 +394,8 @@ button:focus-visible, #feed:focus-visible { outline: 2px solid #ffffff; outline-
     settle();
   }
   function setMode(mode) {
+    if (mode === 'pinned' || s.mode === 'pinned') used('pin');
+    else used('toggle');
     s.wasPinned = false;
     s.mode = mode;
     s.follow = true;

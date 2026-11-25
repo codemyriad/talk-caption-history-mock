@@ -10,7 +10,7 @@ It accompanies the feature request [nextcloud/spreed#20400](https://github.com/n
 
 ## What to try
 
-The three buttons under the mock (Earlier captions, Talk sidebar, Pin to side) switch between the states. Inside the mock:
+The three buttons under the mock (Earlier captions, Talk sidebar, Pin to side) switch between the states. Inside the mock, the controls that work pulse until you have used them once; the other buttons are drawn for context and do nothing:
 
 - The button beside the caption box opens and closes the history. Esc closes it too.
 - Scroll up to read back. The box stops following, and "Jump to live" returns to the newest line.
